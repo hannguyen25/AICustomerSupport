@@ -1,0 +1,29 @@
+import httpx
+
+# Sau khi add thành công vào ChromaDB, thực hiện gọi đồng bộ ngược về C# Backend
+async def sync_chunks_to_sql(document_id: str, version_id: str, chunks: list):
+    csharp_backend_url = "http://csharp-backend:5145/api/documents/sync-chunks"
+    
+    payload = {
+        "documentId": document_id,
+        "versionId": version_id,
+        "chunks": [
+            {
+                "chunkIndex": chunk["chunk_index"],
+                "content": chunk["content"],
+                "pageNumber": chunk["page_number"],
+                "tokenCount": chunk["token_count"]
+            }
+            for chunk in chunks
+        ]
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(csharp_backend_url, json=payload, timeout=10.0)
+            if response.status_code == 200:
+                print(">>> Đồng bộ chunks vào SQL Server thành công!")
+            else:
+                print(f">>> Lỗi đồng bộ SQL Server: {response.text}")
+        except Exception as e:
+            print(f">>> Không thể kết nối tới C# Backend để đồng bộ chunks: {str(e)}")

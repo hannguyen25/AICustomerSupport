@@ -1,0 +1,54 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver-container
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=MyPassword@123
+      - MSSQL_PID=Express
+      - AI_SERVICE_URL=http://ai-service:8001
+    ports:
+      - "1434:1433"
+    restart: always
+    # Thêm healthcheck để Docker biết khi nào SQL Server đã sẵn sàng thực sự
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "MyPassword@123", "-C", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  csharp-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: csharp-backend-container
+    ports:
+      - "5145:5145"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:5145
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=AICustomerSupportDb;User Id=sa;Password=MyPassword@123;TrustServerCertificate=True;
+    depends_on:
+      sqlserver:
+        condition: service_healthy # Đợi SQL Server hoàn tất khởi động mới cho chạy Backend
+    restart: always
+
+  ai-service:
+    build:
+      context: ./src/ai-service
+      dockerfile: Dockerfile
+    container_name: ai-service-container
+    ports:
+      - "8001:8001"
+    environment:
+      - CSHARP_BACKEND_URL=http://csharp-backend:5145
+      - CHROMA_SERVER_NO_ANONYMIZED_TELEMETRY=true
+      - ANONYMIZED_TELEMETRY=false
+      - OPENAI_API_KEY=ollama  
+      - OPENAI_BASE_URL=http://host.docker.internal:11434/v1
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - csharp-backend
+    restart: always

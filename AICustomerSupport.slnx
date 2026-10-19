@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AICustomerSupport.Application/AICustomerSupport.Application.csproj" />
+    <Project Path="src/AICustomerSupport.Domain/AICustomerSupport.Domain.csproj" />
+    <Project Path="src/AICustomerSupport.Infrastructure/AICustomerSupport.Infrastructure.csproj" />
+    <Project Path="src/AICustomerSupport.Presentation/AICustomerSupport.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AICustomerSupport.UnitTests/AICustomerSupport.UnitTests.csproj" />
+  </Folder>
+</Solution>
