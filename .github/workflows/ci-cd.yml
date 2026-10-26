@@ -1,0 +1,84 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  # 1. Continuous Integration (CI) - Chạy Test
+  test-backend:
+    name: Test .NET Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run Unit Tests
+        run: dotnet test --no-restore --verbosity normal
+
+  test-ai-service:
+    name: Test Python AI Service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./src/ai-service # Đường dẫn tới thư mục Python service của bạn
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run Pytest
+        run: pytest
+
+  # 2. Continuous Deployment (CD) - Build & Push Docker Images
+  build-and-push:
+    name: Build & Push Docker Image
+    needs: [test-backend, test-ai-service] # Chỉ chạy khi test thành công
+    if: github.event_name == 'push' # Chỉ tự động push khi push code lên nhánh chính
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push C# Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./src/AICustomerSupport.Presentation/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/aicustomer-backend:latest
+
+      - name: Build and push AI Service Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/ai-service
+          file: ./src/ai-service/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/aicustomer-ai-service:latest
