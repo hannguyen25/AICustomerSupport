@@ -21,10 +21,14 @@ jobs:
           dotnet-version: '10.0'
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: |
+          dotnet restore src/AICustomerSupport.Presentation/AICustomerSupport.Presentation.csproj
+          dotnet restore src/AICustomerSupport.Infrastructure/AICustomerSupport.Infrastructure.csproj
+          dotnet restore tests/AICustomerSupport.UnitTests/AICustomerSupport.UnitTests.csproj
 
       - name: Run Unit Tests
         run: dotnet test tests/AICustomerSupport.UnitTests/AICustomerSupport.UnitTests.csproj --no-restore --verbosity normal
+        
   test-ai-service:
     name: Test Python AI Service
     runs-on: ubuntu-latest
