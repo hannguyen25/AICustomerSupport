@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Unit Tests
         run: dotnet test tests/AICustomerSupport.UnitTests/AICustomerSupport.UnitTests.csproj --no-restore --verbosity normal
-        
+
   test-ai-service:
     name: Test Python AI Service
     runs-on: ubuntu-latest
@@ -74,7 +74,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./src/AICustomerSupport.Presentation/Dockerfile
+          file: ./Dockerfile  
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/aicustomer-backend:latest
 
@@ -84,4 +84,4 @@ jobs:
           context: ./src/ai-service
           file: ./src/ai-service/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/aicustomer-ai-service:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/aicustomer-ai-service:lates
