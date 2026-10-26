@@ -20,9 +20,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // 2. Register Application & Infrastructure Services
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
-builder.Services.AddScoped<IChatService, ChatService>(); // Đăng ký IChatService
+builder.Services.AddScoped<IChatService, ChatService>(); 
+builder.Services.AddScoped<ITokenBlacklistService, RedisTokenBlacklistService>();
 
-// 3. Configure JWT Authentication
+// 3. Configure Redis Distributed Cache
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "AICustomerSupport_Session:";
+});
+
+// 4. Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret missing");
 
@@ -42,6 +50,25 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+    };
+
+    // === Thêm phần sự kiện này để kiểm tra Token Blacklist trên Redis ===
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            // Lấy service kiểm tra blacklist từ DI container của HttpContext
+            var blacklistService = context.HttpContext.RequestServices.GetRequiredService<ITokenBlacklistService>();
+            
+            // Lấy claim 'jti' (JWT ID) từ token
+            var jti = context.Principal?.Claims.FirstOrDefault(c => c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti)?.Value;
+
+            if (!string.IsNullOrEmpty(jti) && await blacklistService.IsTokenBlacklistedAsync(jti))
+            {
+                // Từ chối request nếu token đã bị thu hồi (đăng xuất)
+                context.Fail("Token này đã bị thu hồi.");
+            }
+        }
     };
 });
 

@@ -24,8 +24,7 @@ jobs:
         run: dotnet restore
 
       - name: Run Unit Tests
-        run: dotnet test --no-restore --verbosity normal
-
+        run: dotnet test tests/AICustomerSupport.UnitTests/AICustomerSupport.UnitTests.csproj --no-restore --verbosity normal
   test-ai-service:
     name: Test Python AI Service
     runs-on: ubuntu-latest

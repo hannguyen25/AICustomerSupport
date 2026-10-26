@@ -6,17 +6,28 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=MyPassword@123
       - MSSQL_PID=Express
-      - AI_SERVICE_URL=http://ai-service:8001
     ports:
       - "1434:1433"
     restart: always
-    # Thêm healthcheck để Docker biết khi nào SQL Server đã sẵn sàng thực sự
     healthcheck:
       test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "MyPassword@123", "-C", "-Q", "SELECT 1"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
+
+  # Thêm dịch vụ Redis vào Docker Compose
+  redis:
+    image: redis:alpine
+    container_name: aicustomersupport-redis
+    ports:
+      - "6379:6379"
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   csharp-backend:
     build:
@@ -29,9 +40,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://0.0.0.0:5145
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=AICustomerSupportDb;User Id=sa;Password=MyPassword@123;TrustServerCertificate=True;
+      - ConnectionStrings__Redis=redis:6379  
     depends_on:
       sqlserver:
-        condition: service_healthy # Đợi SQL Server hoàn tất khởi động mới cho chạy Backend
+        condition: service_healthy
+      redis:
+        condition: service_healthy 
     restart: always
 
   ai-service:
@@ -43,12 +57,33 @@ services:
       - "8001:8001"
     environment:
       - CSHARP_BACKEND_URL=http://csharp-backend:5145
+      - REDIS_HOST=redis                  
       - CHROMA_SERVER_NO_ANONYMIZED_TELEMETRY=true
       - ANONYMIZED_TELEMETRY=false
+      - POSTHOG_DISABLED=True
       - OPENAI_API_KEY=ollama  
       - OPENAI_BASE_URL=http://host.docker.internal:11434/v1
+      - PYTHONHTTPSVERIFY=0
+      - HF_HUB_DISABLE_SSL_VERIFICATION=1
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
       - csharp-backend
+      - redis
+    restart: always
+
+  celery-worker:
+    build:
+      context: ./src/ai-service
+      dockerfile: Dockerfile
+    container_name: celery-worker-container
+    command: celery -A celery_app worker --loglevel=info -P solo
+    environment:
+      - CSHARP_BACKEND_URL=http://csharp-backend:5145
+      - REDIS_HOST=redis
+      - OPENAI_API_KEY=ollama  
+      - OPENAI_BASE_URL=http://host.docker.internal:11434/v1
+    depends_on:
+      - redis
+      - ai-service
     restart: always

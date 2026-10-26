@@ -12,3 +12,5 @@ scikit-learn
 rank-bm25
 openai
 httpx
+redis>=5.0.0
+celery>=5.3.0

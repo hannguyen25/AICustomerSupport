@@ -1,0 +1,32 @@
+[
+  {
+    "id": "q1",
+    "question": "Quy trình các bước để sinh viên đăng ký xét chọn danh hiệu Sinh viên 5 tốt Khoa HTTTQL gồm những gì?",
+    "ground_truth": "Quy trình gồm 5 bước: Bước 1 đăng ký trực tuyến trên sinhvien.hutech.edu.vn; Bước 2 tạo Drive cá nhân theo cú pháp HỌ TÊN_MSSV_LỚP để ở chế độ người xem; Bước 3 tạo 6 thư mục tiêu chí (Đạo đức tốt, Học tập tốt, Thể lực tốt, Tình nguyện tốt, Hội nhập tốt, Ưu tiên); Bước 4 tải bản khai thành tích cá nhân và ảnh chân dung lên Drive cá nhân; Bước 5 hoàn thành link đăng ký.",
+    "relevant_docs": ["HutechTiepNhanHoSoSinhVienNamTot.pdf"]
+  },
+  {
+    "id": "q2",
+    "question": "Thời gian tiếp nhận hồ sơ xét danh hiệu Sinh viên 5 tốt năm học 2024-2025 là khi nào?",
+    "ground_truth": "Thời gian tiếp nhận hồ sơ từ ngày 02/08/2025 đến ngày 15/8/2025, và thời gian bổ sung giấy tờ từ ngày 15/8/2025 đến ngày 20/8/2025.",
+    "relevant_docs": ["HutechTiepNhanHoSoSinhVienNamTot.pdf"]
+  },
+  {
+    "id": "q3",
+    "question": "Thuật ngữ Trí tuệ nhân tạo (AI) được thiết lập bởi ai và vào năm nào?",
+    "ground_truth": "Thuật ngữ Trí tuệ nhân tạo (Artificial Intelligence - AI) được thiết lập bởi John McCarthy tại Hội thảo đầu tiên về chủ đề này vào mùa hè năm 1956.",
+    "relevant_docs": ["GTTriTueNhanTao.pdf"]
+  },
+  {
+    "id": "q4",
+    "question": "Bài toán đong nước sử dụng ba can 3 lít, 5 lít và 9 lít để đong 7 lít nước được phát biểu theo 5 thành phần cơ bản gồm những gì?",
+    "ground_truth": "Gồm 5 thành phần: Trạng thái (bộ ba số nước (a, b, c) trong 3 can), Trạng thái đầu (0,0,0), Trạng thái đích (-, -, 7), Phép chuyển trạng thái (làm rỗng can hoặc chuyển nước giữa các can đến hết nguồn hoặc đầy đích), và Chi phí mỗi phép chuyển là 1.",
+    "relevant_docs": ["GTTriTueNhanTao.pdf"]
+  },
+  {
+    "id": "q5",
+    "question": "Giải thuật A* trong tìm kiếm heuristic có cách tính hàm đánh giá f(n) như thế nào?",
+    "ground_truth": "Hàm đánh giá f(n) = g(n) + h(n), trong đó g(n) là hàm chi phí khoảng cách thực tế từ trạng thái đầu đến n, và h(n) là hàm ước lượng chi phí khoảng cách từ n đến trạng thái đích (với điều kiện g(n) là ước lượng dưới).",
+    "relevant_docs": ["GTTriTueNhanTao.pdf"]
+  }
+]

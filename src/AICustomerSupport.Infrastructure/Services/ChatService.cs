@@ -19,7 +19,7 @@ public class ChatService : IChatService
     {
         _context = context;
         _httpClient = httpClientFactory.CreateClient();
-        _httpClient.Timeout = TimeSpan.FromMinutes(3);
+        _httpClient.Timeout = TimeSpan.FromMinutes(5);
         _logger = logger;
     }
 

@@ -4,13 +4,16 @@ from fastapi import HTTPException
 from fastapi.concurrency import run_in_threadpool
 from .RerankService import RerankService
 from openai import AsyncOpenAI, RateLimitError, APITimeoutError
+from services.redis_cache import RedisCacheManager
 
 logger = logging.getLogger(__name__)
 
 class RAGService:
     def __init__(self, vector_store_service):
+        redis_host = os.environ.get("REDIS_HOST", "localhost")
         self.vector_store = vector_store_service
         self.rerank_service = RerankService() # Khởi tạo Reranker Service
+        self.cache = RedisCacheManager(host=redis_host, port=6379, ttl=1800)
 
         self.client = AsyncOpenAI(
             api_key=os.environ.get("OPENAI_API_KEY", "ollama"),
@@ -18,6 +21,13 @@ class RAGService:
         )
 
     async def answer_query(self, query: str, top_k: int = 5, similarity_threshold: float = 0.4):
+
+        # 1. Kiểm tra cache Redis trước tiên
+        cached_result = self.cache.get(query)
+        if cached_result:
+            print("[CACHE HIT] Lấy kết quả trực tiếp từ Redis, tiết kiệm Vector DB & LLM!")
+            return cached_result
+        
         try:
             # Lấy số lượng ứng viên rộng từ Hybrid Search để bước Rerank lọc lại chính xác
             fetch_k = max(top_k * 3, 20)
@@ -52,7 +62,6 @@ class RAGService:
             raw_sources = []
             
             for res in reranked_results:
-                # Sử dụng trực tiếp điểm số từ Reranker làm độ tin cậy (hoặc chuẩn hóa tuỳ ý)
                 rerank_score = res.get("rerank_score", 0.0)
                 
                 valid_chunks.append(res["content"])
@@ -106,11 +115,17 @@ class RAGService:
 
             answer = response.choices[0].message.content
 
-            return {
+            # Đóng gói kết quả trả về
+            result_data = {
                 "answer": answer,
                 "sources": final_sources,
                 "status": "answered"
             }
+
+            # 3. Lưu kết quả vào Redis Cache sau khi sinh xong
+            self.cache.set(query, result_data)
+
+            return result_data
 
         except RateLimitError:
             logger.warning("AI Service Rate Limit exceeded.")

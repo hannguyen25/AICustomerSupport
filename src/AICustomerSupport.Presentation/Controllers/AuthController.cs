@@ -5,6 +5,7 @@ using AICustomerSupport.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace AICustomerSupport.Presentation.Controllers;
 
@@ -14,12 +15,18 @@ public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly ITokenBlacklistService _blacklistService; // Thêm service quản lý Blacklist Token
     private readonly PasswordHasher<object> _passwordHasher = new();
 
-    public AuthController(AppDbContext context, IJwtTokenService jwtTokenService)
+    // Tiêm (Inject) ITokenBlacklistService vào constructor
+    public AuthController(
+        AppDbContext context, 
+        IJwtTokenService jwtTokenService, 
+        ITokenBlacklistService blacklistService)
     {
         _context = context;
         _jwtTokenService = jwtTokenService;
+        _blacklistService = blacklistService;
     }
 
     [HttpPost("login")]
@@ -93,6 +100,34 @@ public class AuthController : ControllerBase
         await _context.SaveChangesAsync();
 
         return Ok(new { message = $"Account with role '{targetRoleName}' created successfully!" });
+    }
+
+    [HttpPost("logout")]
+    [Authorize] // Yêu cầu phải gửi kèm Access Token hợp lệ trong Header (Bearer Token)
+    public async Task<IActionResult> Logout()
+    {
+        // 1. Lấy mã định danh unique của token (jti) từ Claims
+        var jti = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+        
+        // 2. Lấy thời gian hết hạn (exp) để tính thời gian sống (TTL) lưu trên Redis
+        var expClaim = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Exp)?.Value;
+
+        if (string.IsNullOrEmpty(jti) || string.IsNullOrEmpty(expClaim))
+        {
+            return BadRequest(new { message = "Token không hợp lệ hoặc thiếu thông tin định danh." });
+        }
+
+        long expUnix = long.Parse(expClaim);
+        var expiryDate = DateTimeOffset.FromUnixTimeSeconds(expUnix);
+        var timeToLive = expiryDate - DateTimeOffset.UtcNow;
+
+        // 3. Nếu token vẫn còn thời gian sống thì đưa vào Redis Blacklist
+        if (timeToLive > TimeSpan.Zero)
+        {
+            await _blacklistService.BlacklistTokenAsync(jti, timeToLive);
+        }
+
+        return Ok(new { message = "Đăng xuất thành công và token đã bị thu hồi." });
     }
 }
 

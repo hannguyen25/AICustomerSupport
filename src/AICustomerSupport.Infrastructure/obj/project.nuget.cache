@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "CyEptvp8ijg=",
+  "dgSpecHash": "rO0sPL5V9iE=",
   "success": true,
   "projectFilePath": "C:\\Users\\Han\\OneDrive\\Desktop\\AICustomerSupport\\src\\AICustomerSupport.Infrastructure\\AICustomerSupport.Infrastructure.csproj",
   "expectedPackageFiles": [
@@ -24,6 +24,7 @@
     "C:\\Users\\Han\\.nuget\\packages\\microsoft.entityframeworkcore.design\\10.0.12\\microsoft.entityframeworkcore.design.10.0.12.nupkg.sha512",
     "C:\\Users\\Han\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\10.0.12\\microsoft.entityframeworkcore.relational.10.0.12.nupkg.sha512",
     "C:\\Users\\Han\\.nuget\\packages\\microsoft.entityframeworkcore.sqlserver\\10.0.12\\microsoft.entityframeworkcore.sqlserver.10.0.12.nupkg.sha512",
+    "C:\\Users\\Han\\.nuget\\packages\\microsoft.extensions.caching.stackexchangeredis\\10.0.13\\microsoft.extensions.caching.stackexchangeredis.10.0.13.nupkg.sha512",
     "C:\\Users\\Han\\.nuget\\packages\\microsoft.extensions.dependencymodel\\10.0.12\\microsoft.extensions.dependencymodel.10.0.12.nupkg.sha512",
     "C:\\Users\\Han\\.nuget\\packages\\microsoft.extensions.hosting\\10.0.12\\microsoft.extensions.hosting.10.0.12.nupkg.sha512",
     "C:\\Users\\Han\\.nuget\\packages\\microsoft.identity.client\\4.84.2\\microsoft.identity.client.4.84.2.nupkg.sha512",
@@ -40,6 +41,8 @@
     "C:\\Users\\Han\\.nuget\\packages\\microsoft.visualstudio.solutionpersistence\\1.0.52\\microsoft.visualstudio.solutionpersistence.1.0.52.nupkg.sha512",
     "C:\\Users\\Han\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
     "C:\\Users\\Han\\.nuget\\packages\\newtonsoft.json\\13.0.4\\newtonsoft.json.13.0.4.nupkg.sha512",
+    "C:\\Users\\Han\\.nuget\\packages\\pipelines.sockets.unofficial\\2.2.8\\pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
+    "C:\\Users\\Han\\.nuget\\packages\\stackexchange.redis\\2.7.27\\stackexchange.redis.2.7.27.nupkg.sha512",
     "C:\\Users\\Han\\.nuget\\packages\\system.clientmodel\\1.8.0\\system.clientmodel.1.8.0.nupkg.sha512",
     "C:\\Users\\Han\\.nuget\\packages\\system.codedom\\6.0.0\\system.codedom.6.0.0.nupkg.sha512",
     "C:\\Users\\Han\\.nuget\\packages\\system.composition\\9.0.0\\system.composition.9.0.0.nupkg.sha512",
