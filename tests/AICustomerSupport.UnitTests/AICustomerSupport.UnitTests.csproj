@@ -15,7 +15,7 @@
     <!-- Thêm Moq không cần ép version cứng để tránh lỗi lệch version -->
     <PackageReference Include="Moq" Version="4.20.72" />
     <!-- Sử dụng thư viện Distributed Cache mặc định tích hợp sẵn hoặc gọi không chỉ định version cũ -->
-    <PackageReference Include="Microsoft.Extensions.Caching.Distributed" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Distributed" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
