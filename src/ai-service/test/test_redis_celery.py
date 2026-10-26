@@ -39,4 +39,4 @@ def test_vector_db_retrieval_across_three_files():
 
     # Assert: Đảm bảo hệ thống RAG truy xuất đúng các tài liệu trong kho Vector DB
     assert len(results) == 3
-    assert any("Sinhviennaotot" in r["source"] or "Renluyen" in r["source"] for r in results)
+    assert any("HutechTiepNhanHoSoSinhVienNamTot.pdf" in r["source"] or "ThongBaoKhungDiemRenLuyen.pdf" in r["source"] for r in results)
